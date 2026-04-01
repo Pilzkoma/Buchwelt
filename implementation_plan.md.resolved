@@ -1,0 +1,70 @@
+# Digital Book Library Implementation Plan
+
+This plan outlines the architecture and implementation steps for building a modern web application to manage a digital library of over 200 books, featuring OCR scanning, search & ranking, and AI-powered chat and summarization.
+
+## User Review Required
+
+> [!IMPORTANT]
+> This application requires an AI API provider for the chat and summarization features, as well as a decision on where to store the data. Please review the **Open Questions** section.
+
+## Architecture
+
+- **Framework**: React via Vite (fast, robust component state management).
+- **Styling**: Vanilla CSS focused on modern, premium aesthetics (dark themes, glassmorphism, smooth gradients, and interactive micro-animations).
+- **APIs**: Tesseract.js (for client-side OCR without server uploads), Open Library API (for retrieving book metadata like titles, authors, covers), and a generic AI client using a standard provider (e.g., OpenAI/Gemini/Anthropic) for the book chat.
+- **Persistence**: IndexedDB (browser-local storage) which is very capable of storing thousands of book entries.
+
+## Proposed Changes
+
+### Configuration and Setup
+- Initialize the application using `npx create-vite`.
+- Set up necessary dependencies: `tesseract.js` (OCR), `react-router-dom` (routing), `idb` (database wrapper), `lucide-react` (icons), and an AI SDK.
+
+### Core Styles
+#### [NEW] `src/index.css`
+A premium design system including color palettes, typography, responsive utilities, and micro-animations.
+
+### Shared Components
+#### [NEW] `src/components/BookCard.tsx`
+Visual representation of books displaying the cover, title, author, and reading status.
+#### [NEW] `src/components/Scanner.tsx`
+Integration with the device camera to take an image, run Tesseract OCR on the text, and parse out title/author/ISBN.
+#### [NEW] `src/components/AiChat.tsx`
+A chat interface that acts as the user's reading companion for each specific book.
+
+### Pages / Views
+#### [NEW] `src/pages/Home.tsx`
+The primary dashboard displaying the library. Includes robust text search and multi-criteria ranking (e.g., rating, read status, recent).
+#### [NEW] `src/pages/BookDetails.tsx`
+A dedicated page displaying the book's overview, a toggle for "Read / Not Read", and the AI summarized overview based on that status, followed by the specific chat interface.
+#### [NEW] `src/pages/AddBook.tsx`
+A view giving the user the option to either scan a book cover/ISBN or enter the details manually.
+
+### Services (Logic)
+#### [NEW] `src/services/db.ts`
+Wrapper over IndexedDB utilizing the `idb` library to handle CRUD operations on the book collection.
+#### [NEW] `src/services/api.ts`
+Functions to interface with the Open Library API to fetch books by ISBN, title, or author.
+#### [NEW] `src/services/ai.ts`
+Functions to prompt the AI model. Includes specific system prompts tailored to whether the book is marked "Read" or "Not Read".
+
+---
+
+## Open Questions
+
+> [!WARNING]
+> Please provide your feedback on the following decisions before I begin coding:
+
+1. **AI Provider**: Which AI API would you like to use for the chat and summarization (e.g., OpenAI, Anthropic, Gemini)? You will need to provide an API key during runtime or via an environment variable (`.env`).
+2. **Framework Choice**: I propose using Vite + React. Is this acceptable, or would you prefer plain Vanilla JS / HTML / CSS?
+3. **Data Storage**: Storing the books locally in your browser via IndexedDB is fast, free, and completely private, but limits data to this single device. Do you prefer this local-only approach, or do you want to eventually sync across devices (which would require setting up a backend like Firebase or Supabase)?
+4. **Book Metadata API**: I plan to use the free **Google Books API** or **Open Library API** to fetch book details once the OCR scanner reads the text/ISBN. Does that work for you?
+
+## Verification Plan
+
+### Manual Verification
+1. Verify the project setup runs locally.
+2. Add a mock book manually to ensure the database layer saves the payload.
+3. Test the OCR Scanner using a webcam or file upload to ensure Tesseract extracts text.
+4. Validate that the AI chat provides different responses (e.g., spoiler-free generic vs in-depth analysis) based on the "Read / Not Read" toggle.
+5. Ensure the UI feels premium with vibrant styles and responsive layouts.

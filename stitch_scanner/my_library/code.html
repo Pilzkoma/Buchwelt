@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Bibliotheca Archive - Digital Library</title>
+<!-- Google Fonts: Newsreader for Serifs, Manrope for UI -->
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface": "#fbf9f4",
+              "inverse-primary": "#b4c8e4",
+              "on-surface": "#1b1c19",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "tertiary": "#251500",
+              "surface-container-highest": "#e4e2dd",
+              "tertiary-fixed-dim": "#e6c093",
+              "surface-container": "#f0eee9",
+              "on-error-container": "#93000a",
+              "surface-container-low": "#f5f3ee",
+              "on-error": "#ffffff",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#2a1800",
+              "inverse-on-surface": "#f2f1ec",
+              "primary": "#03192e",
+              "surface-variant": "#e4e2dd",
+              "secondary": "#516072",
+              "on-primary-container": "#8296b0",
+              "on-surface-variant": "#43474d",
+              "inverse-surface": "#30312e",
+              "on-secondary-fixed": "#0d1d2d",
+              "on-primary-fixed": "#061d32",
+              "primary-fixed": "#d1e4ff",
+              "surface-tint": "#4c6078",
+              "tertiary-container": "#3f2807",
+              "primary-fixed-dim": "#b4c8e4",
+              "on-tertiary-fixed-variant": "#5c421f",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#fbf9f4",
+              "background": "#fbf9f4",
+              "surface-container-high": "#eae8e3",
+              "surface-container-lowest": "#ffffff",
+              "secondary-container": "#d1e1f7",
+              "on-background": "#1b1c19",
+              "primary-container": "#1a2e44",
+              "on-primary-fixed-variant": "#35485f",
+              "on-secondary-fixed-variant": "#39485a",
+              "on-tertiary-container": "#b08e64",
+              "secondary-fixed-dim": "#b8c8dd",
+              "surface-dim": "#dbdad5",
+              "outline-variant": "#c4c6cd",
+              "secondary-fixed": "#d4e4fa",
+              "on-secondary-container": "#556477",
+              "outline": "#74777d",
+              "on-primary": "#ffffff",
+              "tertiary-fixed": "#ffddb6"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "newsreader": ["Newsreader", "serif"],
+              "manrope": ["Manrope", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .editorial-shadow {
+            box-shadow: 0px 20px 40px rgba(27, 28, 25, 0.06);
+        }
+        .glass-nav {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-tertiary-fixed selection:text-on-tertiary-fixed">
+<!-- Top Navigation Shell -->
+<header class="sticky top-0 z-40 bg-surface-bright/90 glass-nav">
+<nav class="flex items-center justify-between px-6 py-4 w-full max-w-none">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform" data-icon="arrow_back">arrow_back</span>
+<h1 class="font-newsreader text-xl italic text-primary tracking-tight">The Scholarly Curator</h1>
+</div>
+<div class="flex items-center gap-6">
+<span class="hidden md:block font-manrope text-xs tracking-widest uppercase text-primary font-bold">Library</span>
+<span class="hidden md:block font-manrope text-xs tracking-widest uppercase text-slate-500 hover:opacity-80 transition-opacity cursor-pointer">Archive</span>
+<span class="material-symbols-outlined text-primary cursor-pointer active:scale-95 transition-transform" data-icon="more_vert">more_vert</span>
+</div>
+</nav>
+</header>
+<main class="max-w-7xl mx-auto px-6 pt-12 pb-32">
+<!-- Search & Filter Section (Editorial Layout) -->
+<section class="mb-20">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="max-w-2xl">
+<h2 class="font-headline text-5xl md:text-7xl text-primary mb-6 leading-tight">Your Digital <br/><span class="italic">Sanctum</span></h2>
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+</div>
+<input class="w-full bg-surface-container-highest border-none rounded-xl py-4 pl-12 pr-4 focus:ring-0 focus:bg-surface-container-lowest transition-all duration-300 font-manrope text-lg editorial-shadow" placeholder="Seek knowledge within your collection..." type="text"/>
+</div>
+</div>
+<div class="flex gap-2 bg-surface-container-low p-1.5 rounded-full">
+<button class="px-6 py-2 rounded-full bg-primary text-white font-manrope text-sm font-medium transition-all">All</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant font-manrope text-sm font-medium hover:bg-surface-container transition-all">Read</button>
+<button class="px-6 py-2 rounded-full text-on-surface-variant font-manrope text-sm font-medium hover:bg-surface-container transition-all">Not Read</button>
+</div>
+</div>
+</section>
+<!-- Main Content: Library Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16">
+<!-- Book Card 1 -->
+<div class="group cursor-pointer">
+<div class="aspect-[2/3] w-full rounded-xl overflow-hidden bg-surface-container-low mb-4 relative transition-transform duration-500 group-hover:-translate-y-2 editorial-shadow">
+<img class="w-full h-full object-cover" data-alt="vertical book cover of a classic literature novel with elegant gold leaf typography on deep navy blue background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGT9iG0sBbMadx2qFYbvSGU4emrR4GzZsElB0fhG_Ni_EnNhwMbtI_Csgeo580qM-Z3Ny_iOPkZdWD2KtKYMWWW6Fmtk5kAW6lCqPJkHJRKw6fiULJM3tfP0LkqCoGtJwtIUWPqc1N7aQjKL9ldOPkkWWUzyKouNjYeN97QT-Q3CagIJ8RcQr2yNDC1vHMEF68M9eaItt3dEzTd1AQBc1CUEEehxv-zNu4OPrFR1F-dj1zFaL3le7SQl9NHoFoKUI7dG0rj8j1p_c"/>
+<div class="absolute top-3 right-3 bg-white/90 backdrop-blur rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="auto_stories">auto_stories</span>
+</div>
+</div>
+<div class="pl-1">
+<h3 class="font-headline text-xl text-primary mb-1 leading-snug group-hover:text-primary-container transition-colors">The Odyssey of Minds</h3>
+<p class="font-manrope text-xs tracking-widest uppercase text-on-surface-variant">Homer St. Claire</p>
+</div>
+</div>
+<!-- Book Card 2 -->
+<div class="group cursor-pointer">
+<div class="aspect-[2/3] w-full rounded-xl overflow-hidden bg-surface-container-low mb-4 relative transition-transform duration-500 group-hover:-translate-y-2 editorial-shadow">
+<img class="w-full h-full object-cover" data-alt="artistic book cover featuring abstract minimalist ink wash patterns in monochrome with subtle ivory highlights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADPFSDoJlm4rxoJlwebfcbALzm5uJp3lo361JACoFiKyFsOQW15yyeEJZ7kWCcqhu8-K5tjL3xE_IuE1_pwzxuuyyuj7o3xn7-caUE9IZVYvcsariN1NI2386fXN4Kbi94gvx6LmcDNio3_fTMYxfD7E9SSs2H3CIOS6XrgYAqKl1ThYINByOWrzHZtFmQ9bHKhzn3WSJFTlnRIK5MxinNoqw_szYeutzdFMm7_YYG6hPDoYiAjvJ3WzfruXBM8CQoDHolgkkUzsM"/>
+</div>
+<div class="pl-1">
+<h3 class="font-headline text-xl text-primary mb-1 leading-snug">Echoes of Antiquity</h3>
+<p class="font-manrope text-xs tracking-widest uppercase text-on-surface-variant">Dr. Evelyn Thorne</p>
+</div>
+</div>
+<!-- Bento Featured Section -->
+<div class="col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-2 row-span-1">
+<div class="h-full bg-primary-container rounded-xl p-8 flex flex-col justify-between text-white relative overflow-hidden group">
+<div class="relative z-10">
+<span class="inline-block px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-manrope text-[10px] font-bold tracking-widest uppercase mb-6">Curator's Choice</span>
+<h4 class="font-headline text-4xl mb-4 italic">The Architecture of Silence</h4>
+<p class="font-manrope text-on-primary-container text-sm max-w-xs leading-relaxed">A profound exploration into the spaces we inhabit and the quietude we seek in a digital age.</p>
+</div>
+<button class="relative z-10 mt-8 self-start px-8 py-3 rounded-xl bg-surface text-primary font-manrope text-sm font-bold tracking-tight hover:opacity-90 transition-all active:scale-95">
+                        Begin Reading
+                    </button>
+<!-- Abstract Background Pattern -->
+<div class="absolute -right-20 -bottom-20 w-64 h-64 rounded-full bg-primary-fixed/5 blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
+</div>
+</div>
+<!-- Book Card 3 -->
+<div class="group cursor-pointer">
+<div class="aspect-[2/3] w-full rounded-xl overflow-hidden bg-surface-container-low mb-4 relative transition-transform duration-500 group-hover:-translate-y-2 editorial-shadow">
+<img class="w-full h-full object-cover" data-alt="vintage aesthetic book cover with aged paper texture and a simple botanical illustration of a fern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1Oz5ulCqPJyv_9-6sOc4M43WSfrXOQHLMaO0I7pOTpPBLNaCe2YS4N2dhyRe5oz39G7XeGXGeIfqwO8sHR67f4WGVLsnZZ-cxZZMy8XPF9sfTPfJdEQZY7W2Fqxi2hDOFMzpuYQgBfH0t27RqglVFTaeJxF0Hu4xilK0MTP-6TC1pMZvdE43xw6M1b1x8ZA1IrPFyHDYpONjYTNaF7QUoBA1tT6zEcg4_xtV5fI6KUoUai2yCwH7s7pi_OTJiWEPIjwEQzZywjfM"/>
+</div>
+<div class="pl-1">
+<h3 class="font-headline text-xl text-primary mb-1 leading-snug">Botanical Archives</h3>
+<p class="font-manrope text-xs tracking-widest uppercase text-on-surface-variant">Julian Vane</p>
+</div>
+</div>
+<!-- Book Card 4 -->
+<div class="group cursor-pointer">
+<div class="aspect-[2/3] w-full rounded-xl overflow-hidden bg-surface-container-low mb-4 relative transition-transform duration-500 group-hover:-translate-y-2 editorial-shadow">
+<img class="w-full h-full object-cover" data-alt="modern minimalist book cover with bold typography and a single dramatic geometric shape in terracotta red" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHmA9-oLsqW96TYCDLtfLA4Tfad8bNuO452DFTZtSTJCLVIPOVvzjFMlwWeAbwUOmBMErsqH0uTP69UqGKyXetf7adL2DpTm3_lN2inSgjjjauoW0VQsnA64Z3yP-93rQtdkdL5Oxsv8_m3xG2UenY8jERsNgOGzGPw1YAtumCVkLi6Jw6BDAVdfhgOViOoDfKlBR7nUSp3nVIT_VqqXIOgu4zEwonjTrNVjSJduiu5ySgfOhdVEEJyymDI0lLjA-soRMV_mxnvRc"/>
+</div>
+<div class="pl-1">
+<h3 class="font-headline text-xl text-primary mb-1 leading-snug">The Geometric Soul</h3>
+<p class="font-manrope text-xs tracking-widest uppercase text-on-surface-variant">Marcus Aurel</p>
+</div>
+</div>
+<!-- Book Card 5 -->
+<div class="group cursor-pointer">
+<div class="aspect-[2/3] w-full rounded-xl overflow-hidden bg-surface-container-low mb-4 relative transition-transform duration-500 group-hover:-translate-y-2 editorial-shadow">
+<img class="w-full h-full object-cover" data-alt="atmospheric book cover with a soft focus image of a misty forest in teal and grey tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVyof3Qzd8qV55iFSHIOi5bbfzOWR3ivRfpbJwBIzQsYhItOp9bqU66X3A5H5r0yjOBDYBXx1auVt1ke_5OTddY0DLTuwUCyw17rzPHk2wqjBg99m4sMyFkx_Wf2KXDd7fvo6XPSqACZtEu8s7ocXOr9D6Ati_84gcB4jQr3ym3CIDDj9V_JBTQMFDWYi3zcmhj4xaw6VhBjp7SQZ5qgRb6DHBfr3oQ1RtcdKXFXomqhroXPXyStt3FmvWXuFdlPGIGjwqDgBrYDk"/>
+</div>
+<div class="pl-1">
+<h3 class="font-headline text-xl text-primary mb-1 leading-snug">Mist &amp; Memory</h3>
+<p class="font-manrope text-xs tracking-widest uppercase text-on-surface-variant">S. J. Penhaligon</p>
+</div>
+</div>
+<!-- Book Card 6 -->
+<div class="group cursor-pointer">
+<div class="aspect-[2/3] w-full rounded-xl overflow-hidden bg-surface-container-low mb-4 relative transition-transform duration-500 group-hover:-translate-y-2 editorial-shadow">
+<img class="w-full h-full object-cover" data-alt="luxurious book cover design with marble texture and copper foil accents for title" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0ZfmWhyVAUB05vugnRpCtSnkhAqJxtUIena_W3RgAvvjrlg4qTFZT85R5CZEOaec2RK8aIrXSh9GXrDplKxeQZML48C-ruDIi8xDbXAjwGlQGhgzzLTO959opyqVGzzqcD_If0SKUSzTfwQXMn4M4gtWDYqaJDRlR0ib3EMjQH2drf828A1NMYs9x7mrFvUWJIc-0tlplRxUsTdR0kEmykFaY-iRaY3sAzmknc0LX9wvinE7fHKD_US0dkntyWaRTUgIM2kgQ_do"/>
+</div>
+<div class="pl-1">
+<h3 class="font-headline text-xl text-primary mb-1 leading-snug">Marble Monuments</h3>
+<p class="font-manrope text-xs tracking-widest uppercase text-on-surface-variant">Helena Troy</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual Scan FAB -->
+<button class="fixed right-6 bottom-32 z-50 flex items-center gap-3 bg-primary text-white pl-5 pr-6 py-4 rounded-full editorial-shadow hover:scale-105 active:scale-95 transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+<span class="font-manrope text-sm font-bold tracking-tight">Scan Book</span>
+</button>
+<!-- Bottom Navigation Shell -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#fbf9f4]/80 dark:bg-slate-950/80 backdrop-blur-md rounded-t-3xl shadow-[0_-10px_40px_rgba(27,28,25,0.04)]">
+<!-- Library (Active) -->
+<div class="flex flex-col items-center justify-center text-[#03192e] dark:text-blue-200 relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#ffddb6] after:rounded-full cursor-pointer group">
+<span class="material-symbols-outlined mb-1 active:scale-90 transition-all duration-300" data-icon="auto_stories">auto_stories</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase">Library</span>
+</div>
+<!-- Scan -->
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#03192e] transition-colors cursor-pointer group">
+<span class="material-symbols-outlined mb-1 active:scale-90 transition-all duration-300" data-icon="barcode_scanner">barcode_scanner</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase">Scan</span>
+</div>
+<!-- Settings -->
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#03192e] transition-colors cursor-pointer group">
+<span class="material-symbols-outlined mb-1 active:scale-90 transition-all duration-300" data-icon="settings">settings</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase">Settings</span>
+</div>
+</footer>
+</body></html>

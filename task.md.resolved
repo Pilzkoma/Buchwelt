@@ -1,0 +1,11 @@
+# Digital Book Library Task Tracker
+
+- [ ] Initialize React Vite application
+- [ ] Install dependencies (`idb`, `react-router-dom`, `tesseract.js`, `lucide-react`, `@google/generative-ai`)
+- [ ] Setup `src/index.css` with premium design tokens
+- [ ] Implement `src/services/db.ts` for IndexedDB storage
+- [ ] Implement `src/services/api.ts` for Open Library integration
+- [ ] Implement `src/services/ai.ts` for Google Gemini integration
+- [ ] Build shared UI components (`BookCard`, `Scanner`, `AiChat`)
+- [ ] Build feature pages (`Home`, `BookDetails`, `AddBook`, `Settings`)
+- [ ] Integrate routing and perform manual testing

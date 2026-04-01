@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Scholarly Curator - Book Scanner</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface": "#fbf9f4",
+              "inverse-primary": "#b4c8e4",
+              "on-surface": "#1b1c19",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "tertiary": "#251500",
+              "surface-container-highest": "#e4e2dd",
+              "tertiary-fixed-dim": "#e6c093",
+              "surface-container": "#f0eee9",
+              "on-error-container": "#93000a",
+              "surface-container-low": "#f5f3ee",
+              "on-error": "#ffffff",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#2a1800",
+              "inverse-on-surface": "#f2f1ec",
+              "primary": "#03192e",
+              "surface-variant": "#e4e2dd",
+              "secondary": "#516072",
+              "on-primary-container": "#8296b0",
+              "on-surface-variant": "#43474d",
+              "inverse-surface": "#30312e",
+              "on-secondary-fixed": "#0d1d2d",
+              "on-primary-fixed": "#061d32",
+              "primary-fixed": "#d1e4ff",
+              "surface-tint": "#4c6078",
+              "tertiary-container": "#3f2807",
+              "primary-fixed-dim": "#b4c8e4",
+              "on-tertiary-fixed-variant": "#5c421f",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#fbf9f4",
+              "background": "#fbf9f4",
+              "surface-container-high": "#eae8e3",
+              "surface-container-lowest": "#ffffff",
+              "secondary-container": "#d1e1f7",
+              "on-background": "#1b1c19",
+              "primary-container": "#1a2e44",
+              "on-primary-fixed-variant": "#35485f",
+              "on-secondary-fixed-variant": "#39485a",
+              "on-tertiary-container": "#b08e64",
+              "secondary-fixed-dim": "#b8c8dd",
+              "surface-dim": "#dbdad5",
+              "outline-variant": "#c4c6cd",
+              "secondary-fixed": "#d4e4fa",
+              "on-secondary-container": "#556477",
+              "outline": "#74777d",
+              "on-primary": "#ffffff",
+              "tertiary-fixed": "#ffddb6"
+            },
+            fontFamily: {
+              "headline": ["Newsreader"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .scanner-frame {
+            box-shadow: 0 0 0 100vmax rgba(3, 25, 46, 0.4);
+        }
+        .shutter-inner {
+            background: linear-gradient(135deg, #03192e 0%, #1a2e44 100%);
+        }
+        .ocr-pulse {
+            animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-tertiary-fixed h-screen overflow-hidden">
+<!-- Top Navigation Shell -->
+<nav class="bg-[#fbf9f4] dark:bg-slate-950 flex items-center justify-between px-6 py-4 w-full max-w-none fixed top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[#03192e] dark:text-blue-100" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-newsreader tracking-tight font-newsreader text-xl italic text-[#03192e] dark:text-blue-50">The Scholarly Curator</h1>
+</div>
+<button class="active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[#03192e] dark:text-blue-100" data-icon="more_vert">more_vert</span>
+</button>
+</nav>
+<!-- Main Camera Canvas -->
+<main class="relative h-screen w-full flex flex-col items-center justify-center pt-16 pb-32">
+<!-- Mock Camera View -->
+<div class="absolute inset-0 z-0">
+<img alt="Close-up of a vintage book cover with gold-leaf typography on a wooden table" class="w-full h-full object-cover grayscale-[20%] brightness-75" data-alt="A vintage book with worn spine and gold embossed lettering resting on a polished dark oak table in soft library lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpXklpqD_ahdI7L54qLJvpfHHHyNIuFIXiycQ8ShEEre_RS2ejz98RYj3WK30srwr8Q3VBjjo3sQBOV6djlKFT5j9j_y9L_ijgh4ypeaLZM_c5jVAUN7p48q1PebPh_aYObhL23_7f5RIebNArH6Nw_RO__PYosOIssnVcsWVwaxQloh6SnR4qCWKwGxAs3ndBNpVZHKQVvHnP9ifDWBNvS4gTFY9TIBEQ9PJClOuDfwdEN1L9Sw2eQjvsyrLt6YRtR9IKZv7h9gM"/>
+</div>
+<!-- Scanning Overlay -->
+<div class="relative z-10 w-full h-full flex flex-col items-center justify-center p-8">
+<!-- Instructions -->
+<div class="mb-12 text-center space-y-2">
+<span class="font-label text-xs uppercase tracking-[0.2em] text-surface-container-lowest opacity-80">Scanning Environment</span>
+<h2 class="font-headline text-3xl text-surface-container-lowest">Align the Volume</h2>
+</div>
+<!-- Viewport Frame -->
+<div class="relative w-full max-w-sm aspect-[3/4] rounded-full border border-surface-container-lowest/30 scanner-frame flex items-center justify-center overflow-hidden">
+<!-- OCR Indicators -->
+<div class="absolute inset-0 border-2 border-tertiary-fixed ocr-pulse pointer-events-none opacity-40"></div>
+<!-- Corner Brackets -->
+<div class="absolute top-8 left-8 w-12 h-12 border-t-2 border-l-2 border-surface-container-lowest"></div>
+<div class="absolute top-8 right-8 w-12 h-12 border-t-2 border-r-2 border-surface-container-lowest"></div>
+<div class="absolute bottom-8 left-8 w-12 h-12 border-b-2 border-l-2 border-surface-container-lowest"></div>
+<div class="absolute bottom-8 right-8 w-12 h-12 border-b-2 border-r-2 border-surface-container-lowest"></div>
+<!-- Floating Data Chips (OCR Animation) -->
+<div class="absolute top-1/4 left-1/4 bg-surface-container-lowest/10 backdrop-blur-md px-3 py-1 rounded-full border border-surface-container-lowest/20">
+<span class="text-[10px] text-surface-container-lowest font-label tracking-widest uppercase">Capturing Text...</span>
+</div>
+</div>
+<!-- Scanning Mode Selector -->
+<div class="mt-12 flex bg-surface-container-lowest/10 backdrop-blur-xl p-1 rounded-full border border-surface-container-lowest/20">
+<button class="px-6 py-2 rounded-full font-label text-xs uppercase tracking-widest text-surface-container-lowest opacity-50 transition-all hover:opacity-100">Title</button>
+<button class="px-6 py-2 rounded-full font-label text-xs uppercase tracking-widest bg-surface-container-lowest text-primary shadow-lg">ISBN</button>
+<button class="px-6 py-2 rounded-full font-label text-xs uppercase tracking-widest text-surface-container-lowest opacity-50 transition-all hover:opacity-100">Author</button>
+</div>
+</div>
+</main>
+<!-- Bottom Control Bar -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-[#fbf9f4]/80 dark:bg-slate-950/80 backdrop-blur-md px-4 pb-12 pt-6 rounded-t-3xl shadow-[0_-10px_40px_rgba(27,28,25,0.04)]">
+<div class="max-w-md mx-auto flex items-center justify-between">
+<!-- Gallery Shortcut -->
+<button class="w-12 h-12 flex items-center justify-center rounded-full surface-container-low active:scale-90 transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="photo_library">photo_library</span>
+</button>
+<!-- Main Shutter -->
+<button class="group relative p-2 border-2 border-primary rounded-full active:scale-90 transition-all duration-300">
+<div class="w-16 h-16 rounded-full shutter-inner flex items-center justify-center shadow-xl">
+<span class="material-symbols-outlined text-white text-3xl" data-icon="barcode_scanner">barcode_scanner</span>
+</div>
+</button>
+<!-- Flash Toggle -->
+<button class="w-12 h-12 flex items-center justify-center rounded-full surface-container-low active:scale-90 transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="flashlight_on">flashlight_on</span>
+</button>
+</div>
+</div>
+<!-- Hidden Navigation Filter (Active Shell Logic) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#fbf9f4]/80 dark:bg-slate-950/80 backdrop-blur-md hidden md:flex">
+<div class="flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#03192e] dark:hover:text-blue-100 transition-colors cursor-pointer flex-col">
+<span class="material-symbols-outlined" data-icon="auto_stories">auto_stories</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Library</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#03192e] dark:text-blue-200 relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#ffddb6] after:rounded-full cursor-pointer">
+<span class="material-symbols-outlined" data-icon="barcode_scanner">barcode_scanner</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Scan</span>
+</div>
+<div class="flex items-center justify-center text-slate-400 dark:text-slate-500 hover:text-[#03192e] dark:hover:text-blue-100 transition-colors cursor-pointer flex-col">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Settings</span>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface": "#fbf9f4",
+              "inverse-primary": "#b4c8e4",
+              "on-surface": "#1b1c19",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "tertiary": "#251500",
+              "surface-container-highest": "#e4e2dd",
+              "tertiary-fixed-dim": "#e6c093",
+              "surface-container": "#f0eee9",
+              "on-error-container": "#93000a",
+              "surface-container-low": "#f5f3ee",
+              "on-error": "#ffffff",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#2a1800",
+              "inverse-on-surface": "#f2f1ec",
+              "primary": "#03192e",
+              "surface-variant": "#e4e2dd",
+              "secondary": "#516072",
+              "on-primary-container": "#8296b0",
+              "on-surface-variant": "#43474d",
+              "inverse-surface": "#30312e",
+              "on-secondary-fixed": "#0d1d2d",
+              "on-primary-fixed": "#061d32",
+              "primary-fixed": "#d1e4ff",
+              "surface-tint": "#4c6078",
+              "tertiary-container": "#3f2807",
+              "primary-fixed-dim": "#b4c8e4",
+              "on-tertiary-fixed-variant": "#5c421f",
+              "on-secondary": "#ffffff",
+              "surface-bright": "#fbf9f4",
+              "background": "#fbf9f4",
+              "surface-container-high": "#eae8e3",
+              "surface-container-lowest": "#ffffff",
+              "secondary-container": "#d1e1f7",
+              "on-background": "#1b1c19",
+              "primary-container": "#1a2e44",
+              "on-primary-fixed-variant": "#35485f",
+              "on-secondary-fixed-variant": "#39485a",
+              "on-tertiary-container": "#b08e64",
+              "secondary-fixed-dim": "#b8c8dd",
+              "surface-dim": "#dbdad5",
+              "outline-variant": "#c4c6cd",
+              "secondary-fixed": "#d4e4fa",
+              "on-secondary-container": "#556477",
+              "outline": "#74777d",
+              "on-primary": "#ffffff",
+              "tertiary-fixed": "#ffddb6"
+            },
+            fontFamily: {
+              "headline": ["Newsreader"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .font-newsreader { font-family: 'Newsreader', serif; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-manrope min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-[#fbf9f4] sticky top-0 w-full z-40 transition-opacity flex items-center justify-between px-6 py-4 w-full max-w-none">
+<div class="flex items-center gap-4">
+<button class="text-[#03192e] active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h1 class="font-newsreader tracking-tight text-[#03192e] font-bold text-lg leading-tight">The Scholarly Curator</h1>
+<span class="text-xs font-manrope text-on-surface-variant uppercase tracking-widest opacity-70">Scholarly Assistant</span>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-[#03192e] active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col max-w-4xl mx-auto w-full px-6 pt-8 pb-32">
+<!-- Book Identity Section (Editorial Asymmetry) -->
+<section class="mb-12 flex flex-col md:flex-row gap-8 items-start">
+<div class="relative w-32 h-48 flex-shrink-0 shadow-xl rounded-lg overflow-hidden bg-primary-container">
+<img alt="The Architecture of Silence book cover" class="w-full h-full object-cover grayscale opacity-80" data-alt="a minimalist book cover titled The Architecture of Silence with abstract geometric architectural shadows in muted beige and charcoal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBseNhj1khL60fwTZIOAQsgpGFCmuB4jP5DqFxZT6dzkyL99xP6vysNZIJ0swJIjrmnayi8GRP34tns0LiLyDq8v_5ue6losdRTmG6Mvruv1aC4PRQFBATXMGJQZfWRFrnK6X_v9u49DuDfI_6M-vrwO4BDm9R5FxyDP_jgsPOkpXlfU-3qbgEX7UpR630Q8crz-YblkI5dAJ5bkAlRy1GoXIUFMFellUSdWDK8wpLwlePNpbvrUYASViu15PPYxxapSDIjMJ-xZLQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent"></div>
+</div>
+<div class="flex-1 pt-4">
+<h2 class="font-newsreader text-4xl italic text-primary leading-tight mb-2">The Architecture of Silence</h2>
+<p class="font-manrope text-on-surface-variant tracking-wide uppercase text-sm mb-6">By Julian V. Sterling</p>
+<div class="flex gap-2">
+<span class="bg-surface-container-high px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-tighter text-on-surface-variant">Ontology</span>
+<span class="bg-surface-container-high px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-tighter text-on-surface-variant">Minimalism</span>
+</div>
+</div>
+</section>
+<!-- Chat Conversation Area -->
+<div class="space-y-10">
+<!-- AI Message -->
+<div class="flex flex-col items-start max-w-[85%]">
+<div class="flex items-center gap-2 mb-3">
+<div class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-tertiary-fixed" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+</div>
+<span class="font-manrope text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Archivist AI</span>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl rounded-tl-none shadow-sm relative overflow-hidden group">
+<div class="absolute left-0 top-0 w-1 h-full bg-primary-container opacity-20"></div>
+<p class="font-newsreader text-lg leading-relaxed text-on-surface">
+                        "In Chapter 4, Sterling argues that silence isn't the absence of sound, but rather the structural foundation of focus. How do you feel this aligns with his earlier critique of urban acoustics?"
+                    </p>
+</div>
+<span class="mt-2 text-[10px] font-manrope text-on-surface-variant/60 ml-1 uppercase">Delivered • 10:24 AM</span>
+</div>
+<!-- User Message -->
+<div class="flex flex-col items-end self-end max-w-[85%]">
+<div class="flex items-center gap-2 mb-3 justify-end">
+<span class="font-manrope text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">The Reader</span>
+<div class="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-primary">person</span>
+</div>
+</div>
+<div class="bg-primary text-white p-6 rounded-xl rounded-tr-none shadow-md">
+<p class="font-manrope text-md leading-relaxed">
+                        I think he's suggesting that modern noise is a form of 'architectural clutter.' Just as a physical room can be overstuffed, our auditory environment lacks the 'negative space' required for deep thought.
+                    </p>
+</div>
+<span class="mt-2 text-[10px] font-manrope text-on-surface-variant/60 mr-1 uppercase text-right">Read • 10:26 AM</span>
+</div>
+<!-- AI Insight Card (Glassmorphism/High-End Pattern) -->
+<div class="flex flex-col items-start w-full">
+<div class="w-full bg-surface-container-low rounded-2xl p-8 border border-outline-variant/10 shadow-sm relative overflow-hidden">
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-tertiary-fixed/20 rounded-full blur-3xl"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<h3 class="font-manrope text-xs font-extrabold uppercase tracking-[0.2em] text-primary">Scholarly Synthesis</h3>
+</div>
+<p class="font-newsreader text-xl leading-snug text-primary mb-4 italic">
+                            "A brilliant observation. This connects directly to the 'Paper Monastery' concept on page 142. Would you like me to extract the passage comparing Gothic cathedrals to modern noise-canceling technology?"
+                        </p>
+<div class="flex gap-4">
+<button class="text-primary text-xs font-bold font-manrope border-b border-primary pb-0.5 hover:opacity-70 transition-opacity">Yes, show passage</button>
+<button class="text-on-surface-variant text-xs font-bold font-manrope hover:opacity-70 transition-opacity">Analyze further</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Input Area -->
+<div class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-surface via-surface to-transparent pointer-events-none">
+<div class="max-w-4xl mx-auto w-full pointer-events-auto">
+<div class="bg-surface-container-lowest rounded-full shadow-[0_20px_40px_rgba(27,28,25,0.06)] flex items-center p-2 pl-6 group transition-all focus-within:ring-2 focus-within:ring-primary/10">
+<input class="bg-transparent border-none focus:ring-0 flex-1 font-manrope text-sm text-on-surface placeholder-on-surface-variant/50" placeholder="Inquire about the text..." type="text"/>
+<div class="flex items-center gap-1">
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- BottomNavBar (Shared Component) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-[#fbf9f4]/80 backdrop-blur-md rounded-t-3xl border-t border-slate-200/20 shadow-[0_-10px_40px_rgba(27,28,25,0.04)] hidden md:hidden">
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-[#03192e] transition-colors" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#03192e] relative after:content-[''] after:absolute after:-bottom-1 after:w-1 after:h-1 after:bg-[#ffddb6] after:rounded-full" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">barcode_scanner</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 hover:text-[#03192e] transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-manrope text-[11px] font-medium tracking-wide uppercase mt-1">Settings</span>
+</a>
+</nav>
+</body></html>
