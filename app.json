@@ -42,15 +42,15 @@
         }
       ],
 	[
-  	  "expo-build-properties",
-    	{
-      	  "android": {
-       	  "extraMavenRepos": [
-          "../../node_modules/@react-native-async-storage/async-storage/android"
-        			]
-      			}
-    		}
-     ],
+  "expo-build-properties",
+  {
+    "android": {
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "buildToolsVersion": "35.0.0"
+    }
+  }
+],
       "@react-native-community/datetimepicker",
       [
         "expo-notifications",
