@@ -42,7 +42,11 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email: email.trim(), password });
+    const { error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { emailRedirectTo: 'buchweltexpo://confirm' },
+    });
     if (error) {
       Alert.alert('Registrierung fehlgeschlagen', error.message);
     } else {
@@ -60,7 +64,9 @@ export default function LoginScreen() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: 'buchweltexpo://reset-password',
+    });
     setLoading(false);
     if (error) {
       Alert.alert('Fehler', error.message);

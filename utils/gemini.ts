@@ -3,6 +3,13 @@ import * as SecureStore from 'expo-secure-store';
 const API_KEY_STORAGE = 'gemini_api_key';
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
+// Simple format validation: Gemini keys are alphanumeric with hyphens/underscores
+const API_KEY_PATTERN = /^[A-Za-z0-9_-]{20,}$/;
+
+// Cooldown to prevent excessive API calls
+let lastRecommendationRequest = 0;
+const RECOMMENDATION_COOLDOWN_MS = 10_000;
+
 export const hasGeminiKey = async (): Promise<boolean> => {
   try {
     const key = await SecureStore.getItemAsync(API_KEY_STORAGE);
@@ -17,7 +24,11 @@ const getApiKey = async (): Promise<string> => {
   if (!key || key.trim().length === 0) {
     throw new Error('Kein Gemini API-Key hinterlegt. Bitte in den Einstellungen eintragen.');
   }
-  return key.trim();
+  const trimmed = key.trim();
+  if (!API_KEY_PATTERN.test(trimmed)) {
+    throw new Error('Ungültiges API-Key-Format. Bitte prüfe den Schlüssel in den Einstellungen.');
+  }
+  return trimmed;
 };
 
 export const generateGeminiCompletion = async (
@@ -64,40 +75,76 @@ export interface BookRecommendation {
   reason: string;
 }
 
-export const getBookRecommendations = async (
-  finishedBooks: { title: string; author: string; ranking?: number | null; tags?: string[] }[],
-  topTags: string[]
+export interface FinishedBookForRec {
+  title: string;
+  author: string;
+  ranking?: number | null;
+  tags?: string[];
+  description?: string | null;
+}
+
+export interface SmartRecommendationOptions {
+  finishedBooks: FinishedBookForRec[];
+  bookName?: string;
+  selectedTags?: string[];
+  topTags?: string[];
+}
+
+export const getSmartRecommendations = async (
+  options: SmartRecommendationOptions
 ): Promise<BookRecommendation[]> => {
+  const now = Date.now();
+  if (now - lastRecommendationRequest < RECOMMENDATION_COOLDOWN_MS) {
+    throw new Error('Bitte warte kurz, bevor du neue Empfehlungen anforderst.');
+  }
+  lastRecommendationRequest = now;
   const apiKey = await getApiKey();
 
+  const { finishedBooks, bookName, selectedTags, topTags } = options;
+
   const bookList = finishedBooks
-    .slice(0, 20) // cap context size
-    .map(b => `"${b.title}" by ${b.author}${b.ranking ? ` (${b.ranking}/5 stars)` : ''}`)
+    .slice(0, 20)
+    .map(b => {
+      const rating = b.ranking ? ` (${b.ranking}/5 stars)` : '';
+      const desc = b.description ? ` – ${b.description.slice(0, 100)}` : '';
+      return `"${b.title}" by ${b.author}${rating}${desc}`;
+    })
     .join('\n');
 
-  const tagList = topTags.slice(0, 10).join(', ');
+  const blocks: string[] = [];
 
-  const prompt = `You are a scholarly literary curator with deep knowledge across all genres and periods.
+  blocks.push(`You are a scholarly literary curator.
 
-Based on this reader's library:
-
+The reader's reading history:
 FINISHED BOOKS:
-${bookList || 'None yet – recommend broadly acclaimed literary works.'}
+${bookList || 'None yet – recommend broadly acclaimed works.'}`);
 
-FAVORITE GENRES / TAGS:
-${tagList || 'Not specified'}
+  if (bookName && bookName.trim()) {
+    blocks.push(`The reader is looking for books similar to: "${bookName.trim()}"`);
+  }
 
-Recommend exactly 5 books this reader would love but likely hasn't read yet. Avoid recommending any books already in their list above.
+  if (selectedTags && selectedTags.length > 0) {
+    const tagList = selectedTags.join(', ');
+    blocks.push(`Focus recommendations on these themes/genres: ${tagList}
+All recommendations MUST be closely related to these themes.`);
+  }
 
-For each recommendation provide:
-- A compelling, specific reason in one sentence (scholarly, insightful tone – not generic)
+  if ((!bookName || !bookName.trim()) && (!selectedTags || selectedTags.length === 0)) {
+    const topList = (topTags ?? []).slice(0, 10).join(', ') || 'general literature';
+    blocks.push(`Based on their complete reading history and favorite genres (${topList}),
+recommend books they would love. Stay within the same genres and themes.`);
+  }
 
+  blocks.push(`Recommend exactly 5 books.
+Avoid any books already in their reading history.
 Respond ONLY with valid JSON, no markdown, no code blocks:
-[{"title": "...", "author": "...", "reason": "..."}, ...]`;
+[{"title": "...", "author": "...", "reason": "..."}, ...]`);
+
+  const prompt = blocks.join('\n\n');
 
   const payload = {
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 1.0, topP: 0.95 },
+    generationConfig: { temperature: 0.95, topP: 0.95 },
   };
 
   const response = await fetch(GEMINI_URL, {

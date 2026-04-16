@@ -10,7 +10,10 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.buchwelt.app"
+      "bundleIdentifier": "com.buchwelt.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.buchwelt.app",
@@ -41,16 +44,16 @@
           }
         }
       ],
-	[
-  "expo-build-properties",
-  {
-    "android": {
-      "compileSdkVersion": 35,
-      "targetSdkVersion": 35,
-      "buildToolsVersion": "35.0.0"
-    }
-  }
-],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
+      ],
       "@react-native-community/datetimepicker",
       [
         "expo-notifications",

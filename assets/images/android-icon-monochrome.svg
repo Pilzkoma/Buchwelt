@@ -1,0 +1,7 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Monochrome foreground for Android themed icons - white on transparent -->
+  <path d="M230,370 L512,302 L512,736 L230,704 Z" fill="white" opacity="0.95"/>
+  <path d="M512,302 L794,370 L794,704 L512,736 Z" fill="white" opacity="0.80"/>
+  <line x1="512" y1="302" x2="512" y2="736" stroke="black" stroke-width="4" opacity="0.15"/>
+  <path d="M716,370 L716,554 L693,534 L670,554 L670,370 Z" fill="white" opacity="0.6"/>
+</svg>

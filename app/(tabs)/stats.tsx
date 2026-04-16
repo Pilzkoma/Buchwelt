@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator,
 } from 'react-native';
@@ -7,6 +7,7 @@ import { useFocusEffect } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/utils/supabase';
+import type { Book } from '@/types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -48,7 +49,7 @@ export default function StatsScreen() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? 'light'];
 
-  const [books, setBooks] = useState<any[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>('months');
 
@@ -63,46 +64,44 @@ export default function StatsScreen() {
     const { data, error } = await supabase
       .from('books')
       .select('id, title, reading_status, finished_at, tags, created_at, current_page, total_pages');
-    if (!error) setBooks(data || []);
+    if (!error) setBooks((data || []) as Book[]);
     setLoading(false);
   };
 
-  // ── Counters ───────────────────────────────────────────────────────────────
-  const total = books.length;
-  const finished = books.filter(b => b.reading_status === 'finished').length;
-  const reading = books.filter(b => b.reading_status === 'reading').length;
-  const abandoned = books.filter(b => b.reading_status === 'abandoned').length;
+  // ── Memoized derived data ──────────────────────────────────────────────────
+  const { total, finished, reading, abandoned, datedBooks } = useMemo(() => {
+    const total = books.length;
+    const finished = books.filter(b => b.reading_status === 'finished').length;
+    const reading = books.filter(b => b.reading_status === 'reading').length;
+    const abandoned = books.filter(b => b.reading_status === 'abandoned').length;
+    const datedBooks = books.filter(b => b.reading_status === 'finished' && b.finished_at);
+    return { total, finished, reading, abandoned, datedBooks };
+  }, [books]);
 
-  // Only books with a real finished_at date count toward trends
-  const datedBooks = books.filter(b => b.reading_status === 'finished' && b.finished_at);
-
-  // ── Averages ───────────────────────────────────────────────────────────────
-  const avgPerWeek = (() => {
+  const avgPerWeek = useMemo(() => {
     if (datedBooks.length === 0) return 0;
-    const dates = datedBooks.map(b => new Date(b.finished_at).getTime());
+    const dates = datedBooks.map(b => new Date(b.finished_at!).getTime());
     const earliest = new Date(Math.min(...dates));
     const weeksElapsed = Math.max(1, Math.ceil((Date.now() - earliest.getTime()) / (7 * 86400000)));
     return (datedBooks.length / weeksElapsed).toFixed(1);
-  })();
+  }, [datedBooks]);
 
-  const avgPerMonth = (() => {
+  const avgPerMonth = useMemo(() => {
     if (datedBooks.length === 0) return 0;
-    const dates = datedBooks.map(b => new Date(b.finished_at).getTime());
+    const dates = datedBooks.map(b => new Date(b.finished_at!).getTime());
     const earliest = new Date(Math.min(...dates));
     const monthsElapsed = Math.max(1,
       (new Date().getFullYear() - earliest.getFullYear()) * 12 +
       new Date().getMonth() - earliest.getMonth() + 1
     );
     return (datedBooks.length / monthsElapsed).toFixed(1);
-  })();
+  }, [datedBooks]);
 
-  // ── Bar chart data ─────────────────────────────────────────────────────────
-  const barData: BarData[] = (() => {
+  const barData: BarData[] = useMemo(() => {
     const now = new Date();
     const buckets: Map<string, number> = new Map();
 
     if (period === 'weeks') {
-      // Build last 10 week buckets
       for (let i = 9; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(d.getDate() - i * 7);
@@ -110,7 +109,7 @@ export default function StatsScreen() {
         buckets.set(key, 0);
       }
       datedBooks.forEach(b => {
-        const key = startOfWeek(new Date(b.finished_at)).toISOString();
+        const key = startOfWeek(new Date(b.finished_at!)).toISOString();
         if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1);
       });
       return Array.from(buckets.entries()).map(([key, count]) => ({
@@ -118,14 +117,13 @@ export default function StatsScreen() {
         count,
       }));
     } else {
-      // Build last 12 month buckets
       for (let i = 11; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const key = startOfMonth(d).toISOString();
         buckets.set(key, 0);
       }
       datedBooks.forEach(b => {
-        const key = startOfMonth(new Date(b.finished_at)).toISOString();
+        const key = startOfMonth(new Date(b.finished_at!)).toISOString();
         if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1);
       });
       return Array.from(buckets.entries()).map(([key, count]) => ({
@@ -133,25 +131,25 @@ export default function StatsScreen() {
         count,
       }));
     }
-  })();
+  }, [datedBooks, period]);
 
-  const maxCount = Math.max(...barData.map(b => b.count), 1);
+  const maxCount = useMemo(() => Math.max(...barData.map(b => b.count), 1), [barData]);
 
-  // ── Currently reading with progress ────────────────────────────────────────
-  const readingWithProgress = books
+  const readingWithProgress = useMemo(() => books
     .filter(b => b.reading_status === 'reading' && b.current_page && b.total_pages && b.total_pages > 0)
     .map(b => ({
       id: b.id,
       title: b.title as string,
-      pct: Math.min(Math.round((b.current_page / b.total_pages) * 100), 100),
+      pct: Math.min(Math.round(((b.current_page ?? 0) / (b.total_pages ?? 1)) * 100), 100),
       current_page: b.current_page as number,
       total_pages: b.total_pages as number,
-    }));
+    })), [books]);
 
-  // ── Top tags ───────────────────────────────────────────────────────────────
-  const tagCounts: Record<string, number> = {};
-  books.forEach(b => (b.tags ?? []).forEach((t: string) => { tagCounts[t] = (tagCounts[t] ?? 0) + 1; }));
-  const topTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const topTags = useMemo(() => {
+    const tagCounts: Record<string, number> = {};
+    books.forEach(b => (b.tags ?? []).forEach((t: string) => { tagCounts[t] = (tagCounts[t] ?? 0) + 1; }));
+    return Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  }, [books]);
 
   if (loading) {
     return (

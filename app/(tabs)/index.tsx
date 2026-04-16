@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/utils/supabase';
 import { OfflineBanner } from '@/components/OfflineBanner';
-import { hasGeminiKey } from '@/utils/gemini';
 import type { Book } from '@/types';
 
 const STATUS_FILTERS = [
@@ -28,7 +28,6 @@ export default function LibraryScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeStatus, setActiveStatus] = useState('all');
   const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [aiEnabled, setAiEnabled] = useState(false);
 
   useEffect(() => {
     fetchBooks();
@@ -39,19 +38,12 @@ export default function LibraryScreen() {
     return () => { supabase.removeChannel(subscription); };
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      fetchBooks();
-      hasGeminiKey().then(setAiEnabled);
-    }, [])
-  );
-
   const fetchBooks = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('books')
-        .select('*')
+        .select('id, title, author, cover_url, reading_status, is_read, tags, current_page, total_pages, created_at')
         .order('created_at', { ascending: false });
       if (error) throw error;
       setBooks((data ?? []) as Book[]);
@@ -85,7 +77,7 @@ export default function LibraryScreen() {
     });
   }, [books, searchQuery, activeStatus, activeTag]);
 
-  const renderBook = ({ item }: { item: Book }) => {
+  const renderBook = useCallback(({ item }: { item: Book }) => {
     const cur = item.current_page ?? 0;
     const tot = item.total_pages ?? 0;
     const hasProgress = item.reading_status === 'reading' && cur > 0 && tot > 0;
@@ -95,7 +87,7 @@ export default function LibraryScreen() {
       <TouchableOpacity style={styles.bookCard} onPress={() => router.push(`/book/${item.id}`)}>
         <View style={[styles.coverPlaceholder, { backgroundColor: theme.surfaceHighest }]}>
           {item.cover_url ? (
-            <Image source={{ uri: item.cover_url }} style={{ width: '100%', height: '100%', borderRadius: 12 }} />
+            <Image source={item.cover_url} style={styles.coverImage} transition={200} cachePolicy="disk" />
           ) : (
             <Text style={{ color: theme.textSecondary, fontSize: 32 }}>📖</Text>
           )}
@@ -115,21 +107,19 @@ export default function LibraryScreen() {
         </View>
       </TouchableOpacity>
     );
-  };
+  }, [theme, router]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <OfflineBanner />
       <View style={styles.topNav}>
         <Text style={[styles.navTitle, { color: theme.primary }]}>BuchWelt</Text>
-        {aiEnabled && (
-          <TouchableOpacity
-            style={[styles.sparklesBtn, { backgroundColor: theme.surfaceHighest }]}
-            onPress={() => router.push('/recommendations')}
-          >
-            <Ionicons name="sparkles" size={18} color={theme.primary} />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={[styles.sparklesBtn, { backgroundColor: theme.surfaceHighest }]}
+          onPress={() => router.push('/recommendations')}
+        >
+          <Ionicons name="sparkles" size={18} color={theme.primary} />
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -239,4 +229,5 @@ const styles = StyleSheet.create({
   progressText: { fontFamily: 'Manrope_600SemiBold', fontSize: 10, letterSpacing: 0.5, marginTop: 2 },
   emptyState: { paddingTop: 60, alignItems: 'center', justifyContent: 'center' },
   emptyText: { fontFamily: 'Manrope_500Medium', fontSize: 16, textAlign: 'center', lineHeight: 24 },
+  coverImage: { width: '100%', height: '100%', borderRadius: 12 },
 });

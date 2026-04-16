@@ -4,12 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { supabase } from '@/utils/supabase';
 import { hasGeminiKey, analyzeBookCover } from '@/utils/gemini';
+import { enrichBookWithGoogleBooksTags } from '@/utils/googleBooks';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import type { BookInput } from '@/types';
+
+const COVER_SCAN_CONSENT_KEY = 'cover_scan_consent_given';
 
 const MAX_TITLE_LENGTH = 255;
 const MAX_AUTHOR_LENGTH = 255;
@@ -164,10 +168,37 @@ export default function ScannerScreen() {
 
   const handleCoverCapture = async () => {
     if (!cameraRef.current || isProcessing) return;
+
+    // One-time privacy consent before sending photos to Google AI
+    const consentGiven = await AsyncStorage.getItem(COVER_SCAN_CONSENT_KEY);
+    if (consentGiven !== 'true') {
+      return new Promise<void>((resolve) => {
+        Alert.alert(
+          'KI-Cover-Erkennung',
+          'Das Foto wird an Google Gemini gesendet, um Titel und Autor zu erkennen. Das Bild wird nicht dauerhaft gespeichert. Fortfahren?',
+          [
+            { text: 'Abbrechen', style: 'cancel', onPress: () => resolve() },
+            {
+              text: 'Zustimmen & scannen',
+              onPress: async () => {
+                await AsyncStorage.setItem(COVER_SCAN_CONSENT_KEY, 'true');
+                resolve();
+                performCoverCapture();
+              },
+            },
+          ]
+        );
+      });
+    }
+    performCoverCapture();
+  };
+
+  const performCoverCapture = async () => {
+    if (!cameraRef.current) return;
     setIsProcessing(true);
     setScannedMenuOpen(true);
     try {
-      const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.6 });
+      const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.3 });
       if (!photo?.base64) throw new Error('Kein Foto aufgenommen.');
       const result = await analyzeBookCover(photo.base64);
       const bookData: BookInput = { title: result.title, author: result.author, description: null, cover_url: null, isbn: null };
@@ -183,10 +214,21 @@ export default function ScannerScreen() {
 
   const saveBookToLibrary = async (bookData: BookInput) => {
     setIsProcessing(true);
-    const { error } = await supabase.from('books').insert([bookData]);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: inserted, error } = await supabase
+      .from('books')
+      .insert([{ ...bookData, user_id: user?.id }])
+      .select('id')
+      .single();
     setIsProcessing(false);
-    if (error) Alert.alert('Fehler', error.message);
-    else Alert.alert('Zur Library hinzugefügt', bookData.title);
+    if (error) {
+      Alert.alert('Fehler', error.message);
+    } else {
+      Alert.alert('Zur Library hinzugefügt', bookData.title);
+      if (inserted?.id) {
+        enrichBookWithGoogleBooksTags(inserted.id, bookData.title, bookData.author);
+      }
+    }
     resetScanner();
   };
 
@@ -202,12 +244,20 @@ export default function ScannerScreen() {
 
   const moveWishlistToLibrary = async (wishlistId: string, bookData: BookInput) => {
     setIsProcessing(true);
-    const { error: insertErr } = await supabase.from('books').insert([bookData]);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: inserted, error: insertErr } = await supabase
+      .from('books')
+      .insert([{ ...bookData, user_id: user?.id }])
+      .select('id')
+      .single();
     if (insertErr) {
       Alert.alert('Fehler', insertErr.message);
       setIsProcessing(false);
       resetScanner();
       return;
+    }
+    if (inserted?.id) {
+      enrichBookWithGoogleBooksTags(inserted.id, bookData.title, bookData.author);
     }
     const { error: deleteErr } = await supabase.from('wishlists').delete().eq('id', wishlistId);
     setIsProcessing(false);
@@ -249,10 +299,10 @@ export default function ScannerScreen() {
 
   if (!permission || !permission.granted) {
     return (
-      <View style={[styles.container, { backgroundColor: '#000', alignItems: 'center', justifyContent: 'center' }]}>
-        <Text style={{ color: '#fff', marginBottom: 20 }}>Kamerazugriff erforderlich.</Text>
-        <TouchableOpacity style={{ backgroundColor: theme.primary, padding: 12, borderRadius: 12 }} onPress={requestPermission}>
-          <Text style={{ color: '#fff' }}>Zugriff erlauben</Text>
+      <View style={[styles.container, styles.permissionContainer]}>
+        <Text style={styles.permissionText}>Kamerazugriff erforderlich.</Text>
+        <TouchableOpacity style={[styles.permissionBtn, { backgroundColor: theme.primary }]} onPress={requestPermission}>
+          <Text style={styles.permissionBtnText}>Zugriff erlauben</Text>
         </TouchableOpacity>
       </View>
     );
@@ -369,6 +419,10 @@ export default function ScannerScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  permissionContainer: { backgroundColor: '#000', alignItems: 'center', justifyContent: 'center' },
+  permissionText: { color: '#fff', marginBottom: 20, fontFamily: 'Manrope_500Medium', fontSize: 16 },
+  permissionBtn: { padding: 12, borderRadius: 12 },
+  permissionBtnText: { color: '#fff', fontFamily: 'Manrope_600SemiBold', fontSize: 14 },
   topNav: { position: 'absolute', top: 50, width: '100%', zIndex: 50, alignItems: 'center' },
   navTitle: { fontFamily: 'Newsreader_400Regular_Italic', fontSize: 20, letterSpacing: -0.5 },
   cameraFrame: { flex: 1, position: 'relative', backgroundColor: '#111' },
