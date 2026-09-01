@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, Image, TouchableOpacity, ScrollView,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView,
   ActivityIndicator, Alert, TextInput, KeyboardAvoidingView, Platform, Modal,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -17,6 +18,7 @@ import type { Book, ReadingStatus, ChatMessage } from '@/types';
 
 const MAX_TAG_LENGTH = 40;
 const MAX_TAGS = 20;
+const VISIBLE_TAGS_TARGET = 5;
 
 const STATUS_OPTIONS: { value: ReadingStatus; label: string; icon: string }[] = [
   { value: 'not_read',  label: 'Nicht gelesen', icon: 'book-outline' },
@@ -51,9 +53,24 @@ export default function BookDetailScreen() {
   const [totalPagesInput, setTotalPagesInput] = useState('');
   const [tagInput, setTagInput] = useState('');
 
+  // Tag toggle system
+  const [allAppTags, setAllAppTags] = useState<string[]>([]);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
+  const [renameTarget, setRenameTarget] = useState<string | null>(null);
+  const [renameInput, setRenameInput] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
+
   useEffect(() => {
     fetchBookDetails();
+    fetchAllAppTags();
   }, [id]);
+
+  const fetchAllAppTags = async () => {
+    const { data } = await supabase.from('books').select('tags');
+    const set = new Set<string>();
+    (data ?? []).forEach((b: { tags?: string[] | null }) => (b.tags ?? []).forEach((t: string) => set.add(t)));
+    setAllAppTags(Array.from(set));
+  };
 
   useEffect(() => {
     hasGeminiKey().then(setAiEnabled);
@@ -200,18 +217,118 @@ export default function BookDetailScreen() {
       return;
     }
     setBook({ ...book, tags: newTags });
+    setAllAppTags(prev => (prev.includes(tag) ? prev : [...prev, tag]));
     setTagInput('');
   };
 
-  const removeTag = async (tag: string) => {
+  const toggleBookTag = async (tag: string) => {
     if (!book) return;
-    const newTags = (book.tags ?? []).filter((t) => t !== tag);
+    const current = book.tags ?? [];
+    const isOn = current.includes(tag);
+    if (!isOn && current.length >= MAX_TAGS) {
+      Alert.alert('Zu viele Tags', `Maximal ${MAX_TAGS} Tags pro Buch.`);
+      return;
+    }
+    const newTags = isOn ? current.filter(t => t !== tag) : [...current, tag];
+    setBook({ ...book, tags: newTags });
     const { error } = await supabase.from('books').update({ tags: newTags }).eq('id', id);
+    if (error) {
+      setBook({ ...book, tags: current });
+      Alert.alert('Fehler', error.message);
+    }
+  };
+
+  const handleTagLongPress = (tag: string) => {
+    Alert.alert(
+      tag,
+      'Was möchtest du mit diesem Tag machen?',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        {
+          text: 'Bearbeiten',
+          onPress: () => {
+            setRenameTarget(tag);
+            setRenameInput(tag);
+          },
+        },
+        {
+          text: 'Löschen',
+          style: 'destructive',
+          onPress: () => confirmDeleteTagGlobally(tag),
+        },
+      ]
+    );
+  };
+
+  const confirmDeleteTagGlobally = (tag: string) => {
+    Alert.alert(
+      'Tag überall löschen?',
+      `"${tag}" wird aus allen Büchern entfernt.`,
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        { text: 'Löschen', style: 'destructive', onPress: () => deleteTagGlobally(tag) },
+      ]
+    );
+  };
+
+  const deleteTagGlobally = async (tag: string) => {
+    const { data, error } = await supabase
+      .from('books')
+      .select('id, tags')
+      .contains('tags', [tag]);
     if (error) {
       Alert.alert('Fehler', error.message);
       return;
     }
-    setBook({ ...book, tags: newTags });
+    for (const b of (data ?? []) as { id: string; tags: string[] | null }[]) {
+      const newTags = (b.tags ?? []).filter(t => t !== tag);
+      await supabase.from('books').update({ tags: newTags }).eq('id', b.id);
+    }
+    setAllAppTags(prev => prev.filter(t => t !== tag));
+    if (book?.tags?.includes(tag)) {
+      setBook({ ...book, tags: book.tags.filter(t => t !== tag) });
+    }
+  };
+
+  const submitRenameTag = async () => {
+    if (!renameTarget) return;
+    const oldTag = renameTarget;
+    const newTag = renameInput.trim();
+    if (!newTag) {
+      Alert.alert('Fehler', 'Tag darf nicht leer sein.');
+      return;
+    }
+    if (newTag.length > MAX_TAG_LENGTH) {
+      Alert.alert('Tag zu lang', `Maximal ${MAX_TAG_LENGTH} Zeichen.`);
+      return;
+    }
+    if (newTag === oldTag) {
+      setRenameTarget(null);
+      return;
+    }
+    setIsRenaming(true);
+    const { data, error } = await supabase
+      .from('books')
+      .select('id, tags')
+      .contains('tags', [oldTag]);
+    if (error) {
+      setIsRenaming(false);
+      Alert.alert('Fehler', error.message);
+      return;
+    }
+    for (const b of (data ?? []) as { id: string; tags: string[] | null }[]) {
+      const mapped = (b.tags ?? []).map(t => (t === oldTag ? newTag : t));
+      const deduped = Array.from(new Set(mapped));
+      await supabase.from('books').update({ tags: deduped }).eq('id', b.id);
+    }
+    setAllAppTags(prev => Array.from(new Set(prev.map(t => (t === oldTag ? newTag : t)))));
+    if (book?.tags) {
+      const mapped = book.tags.map(t => (t === oldTag ? newTag : t));
+      setBook({ ...book, tags: Array.from(new Set(mapped)) });
+    }
+    setIsRenaming(false);
+    setRenameTarget(null);
+    setRenameInput('');
   };
 
   const generateSummary = async () => {
@@ -238,9 +355,8 @@ export default function BookDetailScreen() {
     setChatMessage('');
     setIsChatting(true);
     try {
-      const prompt = `We are discussing the book "${book.title}" by ${book.author}. User question: ${userText}`;
-      const systemInstruction = `You are an expert literary scholar assisting a user. Answer concisely and specifically about the book "${book.title}". Provide interesting insights. Keep formatting clean.`;
-      const aiResponse = await generateGeminiCompletion(prompt, systemInstruction);
+      const systemInstruction = `You are an expert literary scholar assisting a user. Answer concisely and specifically about the book "${book.title}" by ${book.author}. Provide interesting insights. Keep formatting clean.`;
+      const aiResponse = await generateGeminiCompletion(userText, systemInstruction);
       const newAiMsg: ChatMessage = { id: (Date.now() + 1).toString(), role: 'assistant', text: aiResponse };
       setChatHistory(prev => [...prev, newAiMsg]);
     } catch (e: any) {
@@ -283,11 +399,19 @@ export default function BookDetailScreen() {
       >
         {/* Book Metadata */}
         <View style={styles.bookCore}>
-          <Image
-            source={{ uri: book.cover_url || 'https://via.placeholder.com/200x300?text=No+Cover' }}
-            style={[styles.cover, { backgroundColor: theme.surface }]}
-            resizeMode="cover"
-          />
+          {book.cover_url ? (
+            <Image
+              source={book.cover_url}
+              style={[styles.cover, { backgroundColor: theme.surface }]}
+              contentFit="cover"
+              transition={200}
+              cachePolicy="disk"
+            />
+          ) : (
+            <View style={[styles.cover, styles.coverPlaceholder, { backgroundColor: theme.surface }]}>
+              <Ionicons name="book-outline" size={40} color={theme.textSecondary} />
+            </View>
+          )}
           <View style={styles.metadata}>
             <Text style={[styles.title, { color: theme.text }]}>{book.title}</Text>
             <Text style={[styles.author, { color: theme.textSecondary }]}>{book.author}</Text>
@@ -392,22 +516,69 @@ export default function BookDetailScreen() {
         {/* Tags */}
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: theme.textSecondary }]}>TAGS</Text>
-          <View style={styles.tagWrap}>
-            {(book.tags ?? []).map((tag) => (
+          {(() => {
+            const bookTags = book.tags ?? [];
+            const selected = [...bookTags].sort((a, b) => a.localeCompare(b));
+            const unselected = allAppTags
+              .filter(t => !bookTags.includes(t))
+              .sort((a, b) => a.localeCompare(b));
+            const slotsForUnselected = Math.max(0, VISIBLE_TAGS_TARGET - selected.length);
+            const visibleUnselected = tagsExpanded ? unselected : unselected.slice(0, slotsForUnselected);
+            const hiddenCount = unselected.length - visibleUnselected.length;
+            const renderPill = (tag: string, active: boolean) => (
               <TouchableOpacity
                 key={tag}
-                style={[styles.tagChip, { backgroundColor: theme.surfaceHighest }]}
-                onPress={() => removeTag(tag)}
+                style={[
+                  styles.tagChip,
+                  {
+                    backgroundColor: active ? theme.primary : theme.surface,
+                    borderColor: active ? 'transparent' : theme.border,
+                  },
+                ]}
+                onPress={() => toggleBookTag(tag)}
+                onLongPress={() => handleTagLongPress(tag)}
+                delayLongPress={400}
               >
-                <Text style={[styles.tagText, { color: theme.primary }]}>{tag}</Text>
-                <Ionicons name="close" size={12} color={theme.textSecondary} />
+                <Text style={[styles.tagText, { color: active ? '#fff' : theme.textSecondary }]}>
+                  {tag}
+                </Text>
               </TouchableOpacity>
-            ))}
-          </View>
+            );
+            return (
+              <View style={styles.tagWrap}>
+                {selected.map(t => renderPill(t, true))}
+                {visibleUnselected.map(t => renderPill(t, false))}
+                {!tagsExpanded && hiddenCount > 0 && (
+                  <TouchableOpacity
+                    style={[
+                      styles.tagChip,
+                      { backgroundColor: theme.surfaceHighest, borderColor: theme.border },
+                    ]}
+                    onPress={() => setTagsExpanded(true)}
+                  >
+                    <Text style={[styles.tagText, { color: theme.textSecondary }]}>
+                      +{hiddenCount} mehr
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {tagsExpanded && unselected.length > slotsForUnselected && (
+                  <TouchableOpacity
+                    style={[
+                      styles.tagChip,
+                      { backgroundColor: theme.surfaceHighest, borderColor: theme.border },
+                    ]}
+                    onPress={() => setTagsExpanded(false)}
+                  >
+                    <Text style={[styles.tagText, { color: theme.textSecondary }]}>Weniger</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            );
+          })()}
           <View style={styles.tagInputRow}>
             <TextInput
               style={[styles.tagInput, { backgroundColor: theme.surfaceHighest, color: theme.text }]}
-              placeholder="Tag hinzufügen…"
+              placeholder="Neuen Tag hinzufügen…"
               placeholderTextColor={theme.textSecondary}
               value={tagInput}
               onChangeText={setTagInput}
@@ -485,6 +656,45 @@ export default function BookDetailScreen() {
           </View>
         )}
       </ScrollView>
+
+      {/* Rename Tag Modal */}
+      <Modal visible={renameTarget !== null} transparent animationType="fade" onRequestClose={() => setRenameTarget(null)}>
+        <View style={styles.datePickerBackdrop}>
+          <View style={[styles.datePickerCard, { backgroundColor: theme.surface, paddingBottom: 28 }]}>
+            <Text style={[styles.datePickerTitle, { color: theme.primary }]}>Tag umbenennen</Text>
+            <Text style={[styles.datePickerSub, { color: theme.textSecondary }]}>
+              Wird in allen Büchern geändert.
+            </Text>
+            <TextInput
+              style={[styles.tagInput, { backgroundColor: theme.surfaceHighest, color: theme.text, marginTop: 16 }]}
+              value={renameInput}
+              onChangeText={setRenameInput}
+              maxLength={MAX_TAG_LENGTH}
+              autoFocus
+              returnKeyType="done"
+              onSubmitEditing={submitRenameTag}
+            />
+            <View style={styles.datePickerButtons}>
+              <TouchableOpacity
+                style={[styles.datePickerBtn, { borderWidth: 1, borderColor: theme.borderDark }]}
+                onPress={() => { setRenameTarget(null); setRenameInput(''); }}
+                disabled={isRenaming}
+              >
+                <Text style={[styles.datePickerBtnText, { color: theme.text }]}>Abbrechen</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.datePickerBtn, { backgroundColor: theme.primary }]}
+                onPress={submitRenameTag}
+                disabled={isRenaming}
+              >
+                {isRenaming
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={[styles.datePickerBtnText, { color: '#fff' }]}>Speichern</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Finished Date Picker Modal */}
       <Modal visible={showDatePicker} transparent animationType="slide">
@@ -571,6 +781,7 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: 'rgba(0,0,0,0.1)',
   },
+  coverPlaceholder: { alignItems: 'center', justifyContent: 'center' },
   metadata: { flex: 1, justifyContent: 'center' },
   title: { fontFamily: 'Newsreader_700Bold', fontSize: 26, lineHeight: 32, marginBottom: 8 },
   author: { fontFamily: 'Manrope_500Medium', fontSize: 16, marginBottom: 4 },
@@ -590,8 +801,16 @@ const styles = StyleSheet.create({
   progressTrack: { height: 6, borderRadius: 3, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 3 },
   progressLabel: { fontFamily: 'Manrope_500Medium', fontSize: 13 },
-  tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
-  tagChip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
+  tagWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  tagChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
   tagText: { fontFamily: 'Manrope_600SemiBold', fontSize: 13 },
   tagInputRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   tagInput: { flex: 1, fontFamily: 'Manrope_500Medium', fontSize: 15, padding: 12, borderRadius: 10 },

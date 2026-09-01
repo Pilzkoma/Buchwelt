@@ -1,14 +1,16 @@
 import React, { useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  Image, Alert, TextInput, Modal, ActivityIndicator,
+  Alert, TextInput, Modal, ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { useFocusEffect } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { supabase } from '@/utils/supabase';
+import { enrichBookWithGoogleBooksTags } from '@/utils/googleBooks';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import type { WishlistItem } from '@/types';
 
@@ -35,7 +37,7 @@ export default function WishlistScreen() {
       setLoading(true);
       const { data, error } = await supabase
         .from('wishlists')
-        .select('*')
+        .select('id, title, author, isbn, cover_url, description, user_id, added_at')
         .order('added_at', { ascending: false });
       if (error) throw error;
       setItems((data ?? []) as WishlistItem[]);
@@ -58,17 +60,27 @@ export default function WishlistScreen() {
   };
 
   const confirmMove = async (item: WishlistItem) => {
-    const { error: insertError } = await supabase.from('books').insert([{
-      title: item.title,
-      author: item.author,
-      isbn: item.isbn ?? null,
-      cover_url: item.cover_url ?? null,
-      description: item.description ?? null,
-    }]);
+    const { data: { user } } = await supabase.auth.getUser();
+    const { data: inserted, error: insertError } = await supabase
+      .from('books')
+      .insert([{
+        title: item.title,
+        author: item.author,
+        isbn: item.isbn ?? null,
+        cover_url: item.cover_url ?? null,
+        description: item.description ?? null,
+        user_id: user?.id,
+      }])
+      .select('id')
+      .single();
 
     if (insertError) {
       Alert.alert('Fehler beim Hinzufügen', insertError.message);
       return;
+    }
+
+    if (inserted?.id) {
+      enrichBookWithGoogleBooksTags(inserted.id, item.title, item.author);
     }
 
     const { error: deleteError } = await supabase.from('wishlists').delete().eq('id', item.id);
@@ -150,7 +162,7 @@ export default function WishlistScreen() {
     >
       <View style={[styles.coverPlaceholder, { backgroundColor: theme.surfaceHighest }]}>
         {item.cover_url ? (
-          <Image source={{ uri: item.cover_url }} style={styles.coverImage} />
+          <Image source={item.cover_url} style={styles.coverImage} transition={200} cachePolicy="disk" />
         ) : (
           <Text style={{ color: theme.textSecondary, fontSize: 32 }}>📖</Text>
         )}

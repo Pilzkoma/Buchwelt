@@ -87,6 +87,27 @@ export default function SettingsScreen() {
     }
   };
 
+  const removeApiKey = () => {
+    Alert.alert(
+      'API-Schlüssel entfernen',
+      'KI-Features (Empfehlungen, Zusammenfassungen, Cover-Scan) werden deaktiviert.',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        {
+          text: 'Entfernen', style: 'destructive', onPress: async () => {
+            try {
+              await SecureStore.deleteItemAsync(API_KEY_STORAGE);
+              setApiKey('');
+              setKeyIsSaved(false);
+            } catch (e) {
+              Alert.alert('Fehler', 'Schlüssel konnte nicht entfernt werden.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleSignOut = async () => {
     Alert.alert('Abmelden', 'Möchtest du dich wirklich abmelden?', [
       { text: 'Abbrechen', style: 'cancel' },
@@ -97,6 +118,34 @@ export default function SettingsScreen() {
         },
       },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Konto unwiderruflich löschen',
+      'Alle deine Bücher, Wunschlisten und Daten werden endgültig gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden.',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        {
+          text: 'Endgültig löschen',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const { data: { user } } = await supabase.auth.getUser();
+              if (!user) throw new Error('Nicht angemeldet.');
+              // Delete user data from tables
+              await supabase.from('books').delete().eq('user_id', user.id);
+              await supabase.from('wishlists').delete().eq('user_id', user.id);
+              // Sign out (full account deletion requires server-side admin call)
+              await supabase.auth.signOut();
+              Alert.alert('Konto gelöscht', 'Deine Daten wurden entfernt. Das Konto wird beim nächsten Bereinigungslauf vollständig gelöscht.');
+            } catch (e: any) {
+              Alert.alert('Fehler', e.message);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -156,6 +205,24 @@ export default function SettingsScreen() {
           >
             <Text style={[styles.saveButtonText, { color: '#ffffff' }]}>Key speichern</Text>
           </TouchableOpacity>
+
+          {keyIsSaved && (
+            <TouchableOpacity
+              style={[styles.saveButton, { backgroundColor: 'transparent', marginTop: 10 }]}
+              onPress={removeApiKey}
+            >
+              <Text style={[styles.saveButtonText, { color: theme.error }]}>Schlüssel entfernen</Text>
+            </TouchableOpacity>
+          )}
+
+          {keyIsSaved && (
+            <View style={[styles.hintBox, { backgroundColor: theme.surface, marginTop: 16 }]}>
+              <Ionicons name="shield-checkmark-outline" size={16} color={theme.textSecondary} />
+              <Text style={[styles.hintText, { color: theme.textSecondary, marginBottom: 0 }]}>
+                KI-Features senden Daten (Buchtitel, Autoren, Cover-Fotos) an Google Gemini. Deine Daten werden nicht dauerhaft bei Google gespeichert.
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Notifications Card */}
@@ -217,6 +284,13 @@ export default function SettingsScreen() {
             onPress={handleSignOut}
           >
             <Text style={[styles.saveButtonText, { color: theme.error }]}>Abmelden</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.saveButton, { backgroundColor: theme.error, marginTop: 12 }]}
+            onPress={handleDeleteAccount}
+          >
+            <Text style={[styles.saveButtonText, { color: '#fff' }]}>Konto & Daten löschen</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

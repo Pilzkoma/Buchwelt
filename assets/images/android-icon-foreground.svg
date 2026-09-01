@@ -1,0 +1,57 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="leftPage" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#f2efe8"/>
+      <stop offset="100%" style="stop-color:#fbf9f4"/>
+    </linearGradient>
+    <linearGradient id="rightPage" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ece9e2"/>
+      <stop offset="100%" style="stop-color:#e4e2db"/>
+    </linearGradient>
+    <linearGradient id="bookmarkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffddb6"/>
+      <stop offset="100%" style="stop-color:#f5c990"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Book with shadow, slightly larger/centered for safe zone -->
+  <g filter="url(#shadow)">
+    <path d="M230,370 L512,302 L512,736 L230,704 Z" fill="url(#leftPage)"/>
+    <path d="M512,302 L794,370 L794,704 L512,736 Z" fill="url(#rightPage)"/>
+  </g>
+
+  <!-- Spine -->
+  <line x1="512" y1="302" x2="512" y2="736" stroke="#d8d5ce" stroke-width="3" opacity="0.6"/>
+
+  <!-- Left text lines -->
+  <rect x="272" y="372" width="175" height="21" rx="6" fill="#03192e" opacity="0.10"/>
+  <rect x="272" y="403" width="125" height="13" rx="4" fill="#03192e" opacity="0.07"/>
+  <rect x="272" y="444" width="220" height="10" rx="5" fill="#556477" opacity="0.22"/>
+  <rect x="272" y="468" width="202" height="10" rx="5" fill="#556477" opacity="0.22"/>
+  <rect x="272" y="492" width="215" height="10" rx="5" fill="#556477" opacity="0.22"/>
+  <rect x="272" y="516" width="190" height="10" rx="5" fill="#556477" opacity="0.22"/>
+  <rect x="272" y="540" width="210" height="10" rx="5" fill="#556477" opacity="0.22"/>
+  <rect x="272" y="564" width="178" height="10" rx="5" fill="#556477" opacity="0.22"/>
+  <rect x="272" y="588" width="198" height="10" rx="5" fill="#556477" opacity="0.22"/>
+  <rect x="272" y="612" width="152" height="10" rx="5" fill="#556477" opacity="0.22"/>
+
+  <!-- Right text lines -->
+  <rect x="556" y="444" width="210" height="10" rx="5" fill="#556477" opacity="0.17"/>
+  <rect x="556" y="468" width="192" height="10" rx="5" fill="#556477" opacity="0.17"/>
+  <rect x="556" y="492" width="205" height="10" rx="5" fill="#556477" opacity="0.17"/>
+  <rect x="556" y="516" width="180" height="10" rx="5" fill="#556477" opacity="0.17"/>
+  <rect x="556" y="540" width="202" height="10" rx="5" fill="#556477" opacity="0.17"/>
+  <rect x="556" y="564" width="170" height="10" rx="5" fill="#556477" opacity="0.17"/>
+  <rect x="556" y="588" width="190" height="10" rx="5" fill="#556477" opacity="0.17"/>
+  <rect x="556" y="612" width="148" height="10" rx="5" fill="#556477" opacity="0.17"/>
+
+  <!-- Amber bookmark -->
+  <path d="M716,370 L716,554 L693,534 L670,554 L670,370 Z" fill="url(#bookmarkGrad)"/>
+  <line x1="670" y1="370" x2="670" y2="554" stroke="#e8c090" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Spine bottom curve -->
+  <path d="M492,732 Q512,746 532,732" stroke="#c8c5be" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.5"/>
+</svg>
